@@ -196,7 +196,7 @@ const ERROR_RECOVERY_COPY: Record<ErrorMode, TransactionRecoveryUI> = {
   },
   server_error: {
     title: "Service experiencing issues",
-    description: "Our service is temporarily unavailable or experiencing issues. Your details are saved. Try again in a few moments, or contact support for assistance.",
+    description: "Service is temporarily unavailable or experiencing issues. Your details are saved. Try again in a few moments, or contact support for assistance.",
     primaryAction: {
       label: "Try again later",
       action: "retry",
@@ -648,9 +648,11 @@ export function getTransactionRecoveryUI(
   codeOrMode: string,
   reference?: string,
 ): TransactionRecoveryUI {
-  const mode: ErrorMode = codeOrMode.includes("_")
-    ? (mapErrorCodeToErrorMode(codeOrMode) as ErrorMode)
-    : (codeOrMode as ErrorMode);
+  const normalized = codeOrMode.toLowerCase() as ErrorMode;
+  const mode: ErrorMode =
+    normalized in ERROR_RECOVERY_COPY
+      ? normalized
+      : mapErrorCodeToErrorMode(codeOrMode);
 
   const copy = ERROR_RECOVERY_COPY[mode] || ERROR_RECOVERY_COPY.unknown_error;
 

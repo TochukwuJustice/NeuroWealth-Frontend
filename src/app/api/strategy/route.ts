@@ -1,14 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
   parseStrategyKind,
-  StrategyKind,
   StrategyPreference,
   StrategyUpdatePayload,
 } from "@/lib/strategies";
+import { STORAGE_KEYS } from "@/lib/storage-keys";
 
-// In-memory store for the demo/fallback path.
-// Resets on server restart; the client layer mirrors to localStorage for persistence.
-let mockPreference: StrategyKind | null = null;
+const STRATEGY_COOKIE_KEY = STORAGE_KEYS.STRATEGY_PREFERENCE;
 
 function resolveEndpoint(baseUrl: string, path: string): string {
   const normalizedBase = baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`;
@@ -39,8 +37,10 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // Provide the in-memory default. Clients may override via localStorage.
-  const body: StrategyPreference = { strategy: mockPreference };
+  const strategy = parseStrategyKind(
+    request.cookies.get(STRATEGY_COOKIE_KEY)?.value ?? null,
+  );
+  const body: StrategyPreference = { strategy };
   return NextResponse.json(body, {
     headers: { "Cache-Control": "no-store" },
   });
@@ -86,10 +86,14 @@ export async function PUT(request: NextRequest) {
     }
   }
 
-  // Mock: persist in memory and respond with the updated preference.
-  mockPreference = strategy;
   const body: StrategyPreference = { strategy };
-  return NextResponse.json(body, {
+  const response = NextResponse.json(body, {
     headers: { "Cache-Control": "no-store" },
   });
+  response.cookies.set(STRATEGY_COOKIE_KEY, strategy, {
+    path: "/",
+    sameSite: "lax",
+    httpOnly: false,
+  });
+  return response;
 }

@@ -3,6 +3,10 @@
 import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { STORAGE_KEYS } from '@/lib/storage-keys';
+const ONBOARDING_STATE_STORAGE_KEY = STORAGE_KEYS.ONBOARDING_STATE;
+const ONBOARDING_STRATEGY_STORAGE_KEY = STORAGE_KEYS.ONBOARDING_USER_STRATEGY;
+const ONBOARDING_DEPOSIT_STORAGE_KEY = STORAGE_KEYS.ONBOARDING_FIRST_DEPOSIT;
 
 interface OnboardingState {
   completed: boolean;
@@ -20,7 +24,7 @@ export default function OnboardingSettings() {
 
   const loadOnboardingState = () => {
     try {
-      const savedState = localStorage.getItem('onboarding-state');
+      const savedState = localStorage.getItem(ONBOARDING_STATE_STORAGE_KEY);
       if (savedState) {
         const state = JSON.parse(savedState);
         setOnboardingState(state);
@@ -39,9 +43,9 @@ export default function OnboardingSettings() {
     
     try {
       // Clear onboarding state
-      localStorage.removeItem('onboarding-state');
-      localStorage.removeItem('user-strategy');
-      localStorage.removeItem('first-deposit');
+      localStorage.removeItem(ONBOARDING_STATE_STORAGE_KEY);
+      localStorage.removeItem(ONBOARDING_STRATEGY_STORAGE_KEY);
+      localStorage.removeItem(ONBOARDING_DEPOSIT_STORAGE_KEY);
       
       // Reset state
       setOnboardingState(null);

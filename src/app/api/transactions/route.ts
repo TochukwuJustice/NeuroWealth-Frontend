@@ -15,7 +15,8 @@ import {
   transactionRequestSchema,
   zodErrorToDetails,
 } from "@/lib/validation/api";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { isSandboxScenario, resolveSandboxScenario } from "@/lib/api-sandbox";
 
 function resolveEndpoint(baseUrl: string, pathOrUrl: string): string {
   if (pathOrUrl.startsWith("http://") || pathOrUrl.startsWith("https://")) {
@@ -30,7 +31,7 @@ function resolveEndpoint(baseUrl: string, pathOrUrl: string): string {
   return new URL(normalizedPath, normalizedBase).toString();
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   const bodyResult = await readJsonBody(request);
   if (!bodyResult.ok) return bodyResult.response;
   const rawPayload = bodyResult.data;
@@ -54,8 +55,11 @@ export async function POST(request: Request) {
   const apiBaseUrl = process.env.NEUROWEALTH_API_BASE_URL;
   const transactionPath =
     process.env.NEUROWEALTH_TRANSACTIONS_PATH ?? "/transactions";
+  const scenario = resolveSandboxScenario(
+    request.nextUrl.searchParams.get("scenario"),
+  );
 
-  if (apiBaseUrl) {
+  if (apiBaseUrl && !isSandboxScenario(scenario)) {
     try {
       const response = await fetch(
         resolveEndpoint(apiBaseUrl, transactionPath),

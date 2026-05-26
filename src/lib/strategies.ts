@@ -1,3 +1,5 @@
+import { STORAGE_KEYS } from "@/lib/storage-keys";
+
 export type StrategyKind = "conservative" | "balanced" | "growth";
 export type RiskTier = "low" | "medium" | "high";
 
@@ -134,7 +136,7 @@ export function getStrategy(kind: StrategyKind): StrategyCard {
   return found!;
 }
 
-const PREFERENCE_STORAGE_KEY = "nw_strategy_preference";
+const PREFERENCE_STORAGE_KEY = STORAGE_KEYS.STRATEGY_PREFERENCE;
 
 export function loadStoredPreference(): StrategyKind | null {
   if (typeof window === "undefined") return null;
