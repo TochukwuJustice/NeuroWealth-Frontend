@@ -1,10 +1,14 @@
 import { useState } from "react";
 import { NotificationPreferences, DEFAULT_PREFERENCES } from "@/lib/mock-preferences";
+import { STORAGE_KEYS } from "@/lib/storage-keys";
+
+const NOTIFICATION_PREFERENCES_STORAGE_KEY =
+  STORAGE_KEYS.NOTIFICATION_PREFERENCES;
 
 export function useNotificationPreferences() {
   const [preferences, setPreferences] = useState<NotificationPreferences>(() => {
     if (typeof window === "undefined") return DEFAULT_PREFERENCES;
-    const stored = localStorage.getItem("nw-notification-preferences");
+    const stored = localStorage.getItem(NOTIFICATION_PREFERENCES_STORAGE_KEY);
     return stored ? JSON.parse(stored) : DEFAULT_PREFERENCES;
   });
   const [loading] = useState(false);
@@ -22,7 +26,10 @@ export function useNotificationPreferences() {
       },
     };
     setPreferences(updated);
-    localStorage.setItem("nw-notification-preferences", JSON.stringify(updated));
+    localStorage.setItem(
+      NOTIFICATION_PREFERENCES_STORAGE_KEY,
+      JSON.stringify(updated),
+    );
   };
 
   return {

@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { STORAGE_KEYS } from "@/lib/storage-keys";
 
 export type ScenarioType = "success" | "empty" | "loading" | "partial-failure" | "timeout";
 type ModuleType = "portfolio" | "history" | "transactions";
@@ -22,6 +23,7 @@ const defaultScenarios: ScenarioState = {
   history: "success",
   transactions: "success",
 };
+const SANDBOX_STORAGE_KEY = STORAGE_KEYS.SANDBOX_SCENARIOS;
 
 const SandboxContext = createContext<SandboxContextType | undefined>(undefined);
 
@@ -46,7 +48,7 @@ export function SandboxProvider({ children }: SandboxProviderProps) {
     setIsClient(true);
     if (isSandboxMode) {
       // Load saved scenarios from localStorage
-      const saved = localStorage.getItem("sandbox-scenarios");
+      const saved = localStorage.getItem(SANDBOX_STORAGE_KEY);
       if (saved) {
         try {
           setScenarios(JSON.parse(saved));
@@ -60,7 +62,7 @@ export function SandboxProvider({ children }: SandboxProviderProps) {
   useEffect(() => {
     // Save scenarios to localStorage
     if (isClient && isSandboxMode) {
-      localStorage.setItem("sandbox-scenarios", JSON.stringify(scenarios));
+      localStorage.setItem(SANDBOX_STORAGE_KEY, JSON.stringify(scenarios));
     }
   }, [scenarios, isClient, isSandboxMode]);
 

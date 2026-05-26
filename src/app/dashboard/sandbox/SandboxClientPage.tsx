@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { STORAGE_KEYS } from "@/lib/storage-keys";
 
 type ScenarioType = "success" | "empty" | "loading" | "partial-failure" | "timeout";
 type ModuleType = "portfolio" | "history" | "transactions";
@@ -24,9 +25,11 @@ const MODULE_LABELS: Record<ModuleType, string> = {
   history: "History",
   transactions: "Transactions",
 };
+const SANDBOX_STORAGE_KEY = STORAGE_KEYS.SANDBOX_SCENARIOS;
 
 export default function SandboxClientPage() {
   const router = useRouter();
+  const sandboxStorageKey = SANDBOX_STORAGE_KEY;
   const [scenarios, setScenarios] = useState<ScenarioState>({
     portfolio: "success",
     history: "success",
@@ -37,7 +40,7 @@ export default function SandboxClientPage() {
   useEffect(() => {
     setIsClient(true);
     // Load saved scenarios from localStorage
-    const saved = localStorage.getItem("sandbox-scenarios");
+    const saved = localStorage.getItem(sandboxStorageKey);
     if (saved) {
       try {
         setScenarios(JSON.parse(saved));
@@ -45,14 +48,14 @@ export default function SandboxClientPage() {
         console.error("Failed to load sandbox scenarios:", e);
       }
     }
-  }, []);
+  }, [sandboxStorageKey]);
 
   useEffect(() => {
     // Save scenarios to localStorage
     if (isClient) {
-      localStorage.setItem("sandbox-scenarios", JSON.stringify(scenarios));
+      localStorage.setItem(sandboxStorageKey, JSON.stringify(scenarios));
     }
-  }, [scenarios, isClient]);
+  }, [scenarios, isClient, sandboxStorageKey]);
 
   const updateScenario = (module: ModuleType, scenario: ScenarioType) => {
     setScenarios((prev) => ({ ...prev, [module]: scenario }));

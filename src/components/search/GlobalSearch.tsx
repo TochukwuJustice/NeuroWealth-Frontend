@@ -8,9 +8,9 @@ import {
   SearchGroup,
   SearchResultItem,
   hasAnySearchResults,
-  searchMockIndex,
 } from "@/lib/mock-search-index";
 import { useOnClickOutside } from "@/hooks/useOnClickOutside";
+import { getSearchDataProvider } from "@/lib/search-service";
 
 interface GlobalSearchProps {
   placeholder?: string;
@@ -86,7 +86,8 @@ export function GlobalSearch({
     setIsLoading(true);
     setErrorMessage(null);
 
-    searchMockIndex(debouncedQuery)
+    getSearchDataProvider()
+      .search(debouncedQuery)
       .then((grouped) => {
         if (cancelled) return;
         setResults(grouped);

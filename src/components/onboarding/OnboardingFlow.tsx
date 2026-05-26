@@ -7,6 +7,8 @@ import OnboardingStepper from './OnboardingStepper';
 import WalletConnectStep from './steps/WalletConnectStep';
 import StrategyOverviewStep from './steps/StrategyOverviewStep';
 import FirstDepositStep from './steps/FirstDepositStep';
+import { STORAGE_KEYS } from '@/lib/storage-keys';
+const ONBOARDING_STATE_STORAGE_KEY = STORAGE_KEYS.ONBOARDING_STATE;
 
 interface OnboardingStep {
   id: string;
@@ -56,7 +58,7 @@ export default function OnboardingFlow({
 
   // Load saved state from localStorage
   useEffect(() => {
-    const savedState = localStorage.getItem('onboarding-state');
+    const savedState = localStorage.getItem(ONBOARDING_STATE_STORAGE_KEY);
     if (savedState) {
       try {
         const { completed, lastStep } = JSON.parse(savedState);
@@ -74,7 +76,7 @@ export default function OnboardingFlow({
   // Save state to localStorage
   const saveState = (step: number, completed: boolean = false) => {
     try {
-      localStorage.setItem('onboarding-state', JSON.stringify({
+      localStorage.setItem(ONBOARDING_STATE_STORAGE_KEY, JSON.stringify({
         lastStep: step,
         completed,
         timestamp: Date.now()

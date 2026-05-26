@@ -1,8 +1,8 @@
 import {
   buildScenarioPayload,
   normalizePortfolioPayload,
-  parseScenario,
 } from "@/lib/portfolio";
+import { isSandboxScenario, resolveSandboxScenario } from "@/lib/api-sandbox";
 import {
   ERROR_CODE,
   HTTP_STATUS,
@@ -41,13 +41,13 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const scenario = parseScenario(parsedQuery.data.scenario ?? null);
+  const scenario = resolveSandboxScenario(parsedQuery.data.scenario);
   const apiBaseUrl = process.env.NEUROWEALTH_API_BASE_URL;
   const portfolioPath =
     process.env.NEUROWEALTH_PORTFOLIO_PATH ?? "/portfolio/overview";
 
   // Handle all sandbox scenarios
-  if (scenario !== "live") {
+  if (isSandboxScenario(scenario)) {
     return NextResponse.json(successResponse(buildScenarioPayload(scenario)), {
       headers: {
         "Cache-Control": "no-store",
