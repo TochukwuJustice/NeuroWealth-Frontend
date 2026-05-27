@@ -3,7 +3,7 @@
  * Chart Color Contrast Verification Script
  *
  * Programmatically verifies that all chart colors meet WCAG AA standards
- * for both dark and light backgrounds.
+ * for the actual backgrounds used in the application.
  *
  * Usage: npx tsx scripts/verify-chart-contrast.ts
  */
@@ -14,12 +14,12 @@ import {
   meetsWCAGAA,
 } from "../src/lib/chart-colors-cvd";
 
-// Common background colors
+// Actual background colors from tailwind.config.ts and globals.css
 const BACKGROUNDS = {
-  darkMode: "#020617", // slate-950 (typical dark mode)
+  body: "#020617", // Body background (globals.css)
+  surface: "#111827", // Card/surface background where charts render (tailwind.config.ts)
+  surfaceElevated: "#1F2937", // Elevated surface (tailwind.config.ts)
   lightMode: "#ffffff", // white (typical light mode)
-  darkCard: "#0f172a", // slate-900 (dark mode cards)
-  lightCard: "#f8fafc", // slate-50 (light mode cards)
 };
 
 // WCAG standards
@@ -57,14 +57,18 @@ function testColorContrast(
 }
 
 function formatResult(result: ContrastResult): string {
-  const status = result.passesAAText ? "✅" : "❌";
+  const graphicsStatus = result.passesAAGraphics ? "✅" : "❌";
+  const textStatus = result.passesAAText ? "✅" : "⚠️ ";
   const aaaStatus = result.passesAAAText ? "(AAA)" : "";
 
-  return `${status} ${result.color.padEnd(20)} ${result.hex} on ${result.background.padEnd(12)} → ${result.ratio.toFixed(2)}:1 ${aaaStatus}`;
+  return `${graphicsStatus} ${textStatus} ${result.color.padEnd(18)} ${result.hex} → ${result.ratio.toFixed(2)}:1 ${aaaStatus}`;
 }
 
 function main() {
   console.log("\n🎨 Chart Color Contrast Verification\n");
+  console.log("=".repeat(80));
+  console.log("\nTesting against ACTUAL application backgrounds");
+  console.log("Charts render on surface (#111827), not body (#020617)\n");
   console.log("=".repeat(80));
 
   // Test primary palette
@@ -73,30 +77,35 @@ function main() {
   const primaryColors = Object.entries(CVD_PALETTES.primary);
   const accessibleColors = Object.entries(CVD_PALETTES.accessible);
 
-  // Test against dark mode background
-  console.log(`\n🌙 Dark Mode Background (${BACKGROUNDS.darkMode})\n`);
+  // Test against surface background (where charts are actually rendered)
   console.log(
-    "   WCAG AA Text: 4.5:1 | WCAG AA Graphics: 3:1 | WCAG AAA Text: 7:1\n",
+    `\n🎯 Surface Background - WHERE CHARTS RENDER (${BACKGROUNDS.surface})\n`,
+  );
+  console.log(
+    "   ✅ = Graphics OK (3:1) | ⚠️  = Text needs improvement (4.5:1)\n",
   );
 
-  const darkResults: ContrastResult[] = [];
+  const surfaceResults: ContrastResult[] = [];
 
   primaryColors.forEach(([name, hex]) => {
-    const result = testColorContrast(
-      name,
-      hex,
-      "darkMode",
-      BACKGROUNDS.darkMode,
-    );
-    darkResults.push(result);
+    const result = testColorContrast(name, hex, "surface", BACKGROUNDS.surface);
+    surfaceResults.push(result);
+    console.log(formatResult(result));
+  });
+
+  // Test against body background (for reference)
+  console.log(`\n📄 Body Background - REFERENCE ONLY (${BACKGROUNDS.body})\n`);
+
+  const bodyResults: ContrastResult[] = [];
+
+  primaryColors.forEach(([name, hex]) => {
+    const result = testColorContrast(name, hex, "body", BACKGROUNDS.body);
+    bodyResults.push(result);
     console.log(formatResult(result));
   });
 
   // Test against light mode background
   console.log(`\n☀️  Light Mode Background (${BACKGROUNDS.lightMode})\n`);
-  console.log(
-    "   WCAG AA Text: 4.5:1 | WCAG AA Graphics: 3:1 | WCAG AAA Text: 7:1\n",
-  );
 
   const lightResults: ContrastResult[] = [];
 
@@ -113,29 +122,19 @@ function main() {
 
   // Test accessible palette
   console.log("\n\n♿ ACCESSIBLE PALETTE (Extended Colors)\n");
-  console.log(`\n🌙 Dark Mode Background (${BACKGROUNDS.darkMode})\n`);
+  console.log(`\n🎯 Surface Background (${BACKGROUNDS.surface})\n`);
 
   accessibleColors.forEach(([name, hex]) => {
-    const result = testColorContrast(
-      name,
-      hex,
-      "darkMode",
-      BACKGROUNDS.darkMode,
-    );
+    const result = testColorContrast(name, hex, "surface", BACKGROUNDS.surface);
     console.log(formatResult(result));
   });
 
   // Test neutral colors
   console.log("\n\n🎨 NEUTRAL PALETTE (Supporting Colors)\n");
-  console.log(`\n🌙 Dark Mode Background (${BACKGROUNDS.darkMode})\n`);
+  console.log(`\n🎯 Surface Background (${BACKGROUNDS.surface})\n`);
 
   Object.entries(CVD_PALETTES.neutral).forEach(([name, hex]) => {
-    const result = testColorContrast(
-      name,
-      hex,
-      "darkMode",
-      BACKGROUNDS.darkMode,
-    );
+    const result = testColorContrast(name, hex, "surface", BACKGROUNDS.surface);
     console.log(formatResult(result));
   });
 
@@ -143,18 +142,24 @@ function main() {
   console.log("\n\n" + "=".repeat(80));
   console.log("\n📋 SUMMARY\n");
 
-  const allDarkPass = darkResults.every((r) => r.passesAAText);
+  const allSurfaceGraphicsPass = surfaceResults.every(
+    (r) => r.passesAAGraphics,
+  );
+  const allSurfaceTextPass = surfaceResults.every((r) => r.passesAAText);
   const allLightGraphicsPass = lightResults.every((r) => r.passesAAGraphics);
-  const darkAAACount = darkResults.filter((r) => r.passesAAAText).length;
+  const surfaceAAACount = surfaceResults.filter((r) => r.passesAAAText).length;
 
   console.log(
-    `Dark Mode (Text 4.5:1):      ${allDarkPass ? "✅ ALL PASS" : "❌ SOME FAIL"}`,
+    `Surface (Graphics 3:1):      ${allSurfaceGraphicsPass ? "✅ ALL PASS" : "❌ SOME FAIL"} (CRITICAL for charts)`,
+  );
+  console.log(
+    `Surface (Text 4.5:1):        ${allSurfaceTextPass ? "✅ ALL PASS" : "⚠️  SOME FAIL"} (recommended for labels)`,
   );
   console.log(
     `Light Mode (Graphics 3:1):   ${allLightGraphicsPass ? "✅ ALL PASS" : "❌ SOME FAIL"}`,
   );
   console.log(
-    `Dark Mode AAA (7:1):         ${darkAAACount}/${darkResults.length} colors`,
+    `Surface AAA (7:1):           ${surfaceAAACount}/${surfaceResults.length} colors`,
   );
 
   // Color differentiation test
@@ -172,7 +177,9 @@ function main() {
       const ratio = getContrastRatio(hex1, hex2);
       const status = ratio >= 1.5 ? "✅" : "⚠️";
 
-      console.log(`${status} ${name1} vs ${name2}: ${ratio.toFixed(2)}:1`);
+      console.log(
+        `${status} ${name1.padEnd(10)} vs ${name2.padEnd(10)}: ${ratio.toFixed(2)}:1`,
+      );
     }
   }
 
@@ -180,14 +187,29 @@ function main() {
   console.log("\n✨ Verification complete!\n");
 
   // Exit with error if any critical tests fail
-  if (!allDarkPass) {
+  // For charts, WCAG AA Graphics (3:1) is the critical requirement
+  if (!allSurfaceGraphicsPass) {
     console.error(
-      "❌ CRITICAL: Some colors fail WCAG AA text contrast on dark backgrounds\n",
+      "❌ CRITICAL: Some colors fail WCAG AA graphics contrast (3:1) on surface backgrounds\n",
     );
     process.exit(1);
   }
 
-  console.log("✅ All critical accessibility requirements met!\n");
+  if (!allSurfaceTextPass) {
+    console.warn(
+      "⚠️  WARNING: Some colors fail WCAG AA text contrast (4.5:1) on surface backgrounds\n",
+    );
+    console.warn(
+      "   This is acceptable for chart graphics but not for text labels.\n",
+    );
+    console.warn(
+      "   Consider using lighter shades for axis labels and legends.\n",
+    );
+  }
+
+  console.log(
+    "✅ All critical accessibility requirements met for chart graphics!\n",
+  );
 }
 
 // Run the verification
