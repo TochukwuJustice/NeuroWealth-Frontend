@@ -9,6 +9,8 @@ export type TransactionPreviewState =
   | "failure";
 export type ValidationTone = "error" | "success" | "warning";
 
+import { random } from "./seeded-rng";
+
 // Error recovery types
 export type RecoveryAction = "retry" | "edit" | "support";
 export type ErrorMode =
@@ -279,7 +281,7 @@ function generateReference(kind: TransactionKind): string {
     .toISOString()
     .replace(/[-:TZ.]/g, "")
     .slice(0, 14);
-  const suffix = Math.random().toString(36).slice(2, 8).toUpperCase();
+  const suffix = random().toString(36).slice(2, 8).toUpperCase();
 
   return `NW-${prefix}-${stamp}-${suffix}`;
 }

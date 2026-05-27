@@ -7,7 +7,7 @@ import { useToast } from "@/components/notifications/ToastProvider";
 export const dynamic = "force-dynamic";
 import { Button, Card, InlineBanner } from "@/components/ui";
 import { SettingsSectionSkeleton } from "@/components/ui/Skeleton";
-import { mockAudit } from "@/lib/mock-audit";
+import { mockAuditService } from "@/lib/mock-audit";
 
 interface NotificationPreferences {
   emailNotifications: boolean;
@@ -124,7 +124,7 @@ export default function NotificationsSettingsPage() {
       setSaved(draft);
       setEditing(false);
       setStatus("success");
-      mockAudit.logEvent("settings_change", { section: "notifications", changes: draft });
+      mockAuditService.logEvent("settings_change", { section: "notifications", changes: draft });
       pushToast({
         variant: "success",
         title: "Preferences saved",

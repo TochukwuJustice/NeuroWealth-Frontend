@@ -4,7 +4,7 @@ import { useMemo, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { Check, CheckCircle2, X } from "lucide-react";
 import { useAuth } from "@/contexts";
-import { mockAudit } from "@/lib/mock-audit";
+import { mockAuditService } from "@/lib/mock-audit";
 import { Button, Card, FieldError, FormErrorSummary, SectionError } from "@/components/ui";
 import {
   emailFormat,
@@ -91,12 +91,12 @@ export default function SignUpPage() {
     try {
       await signUp(email, name, password);
       setState("success");
-      mockAudit.logEvent("signup", { email, name, timestamp: new Date().toISOString() });
+      mockAuditService.logEvent("signup", { email, name, timestamp: new Date().toISOString() });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Failed to create account";
       setErrors({ email: message });
       setState("idle");
-      mockAudit.logEvent("signup", { email, status: "failed", reason: message });
+      mockAuditService.logEvent("signup", { email, status: "failed", reason: message });
     }
   };
 

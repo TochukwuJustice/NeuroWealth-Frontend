@@ -1,5 +1,7 @@
 "use client";
 
+import { random } from "./seeded-rng";
+
 export interface AuditEvent {
     id: string;
     eventType: "login" | "logout" | "signup" | "profile_update" | "password_change" | "settings_change" | "transaction" | "export";
@@ -13,11 +15,18 @@ export interface AuditEvent {
 const STORAGE_KEY = "nw_audit_trail";
 
 function generateId(): string {
-    return "evt_" + Math.random().toString(36).substring(2, 11);
+    return "evt_" + random().toString(36).substring(2, 11);
 }
 
-export const mockAudit = {
-    logEvent: (eventType: AuditEvent["eventType"], metadata: Record<string, unknown> = {}): AuditEvent => {
+export interface AuditService {
+    logEvent(eventType: AuditEvent["eventType"], metadata?: Record<string, unknown>): Promise<AuditEvent>;
+    getEvents(): Promise<AuditEvent[]>;
+    clearEvents(): Promise<void>;
+    exportAsCSV(): Promise<string>;
+}
+
+export const mockAuditService: AuditService = {
+    logEvent: async (eventType: AuditEvent["eventType"], metadata: Record<string, unknown> = {}): Promise<AuditEvent> => {
         const event: AuditEvent = {
             id: generateId(),
             eventType,
@@ -28,14 +37,14 @@ export const mockAudit = {
             userAgent: typeof navigator !== "undefined" ? navigator.userAgent : "Unknown",
         };
 
-        const events = mockAudit.getEvents();
+        const events = await mockAuditService.getEvents();
         events.unshift(event);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(events.slice(0, 100)));
 
         return event;
     },
 
-    getEvents: (): AuditEvent[] => {
+    getEvents: async (): Promise<AuditEvent[]> => {
         try {
             const stored = localStorage.getItem(STORAGE_KEY);
             if (stored) {
@@ -48,12 +57,12 @@ export const mockAudit = {
         return [];
     },
 
-    clearEvents: () => {
+    clearEvents: async (): Promise<void> => {
         localStorage.removeItem(STORAGE_KEY);
     },
 
-    exportAsCSV: (): string => {
-        const events = mockAudit.getEvents();
+    exportAsCSV: async (): Promise<string> => {
+        const events = await mockAuditService.getEvents();
         const headers = ["Event ID", "Event Type", "Actor", "Timestamp", "IP Address", "Metadata"];
         const rows = events.map((e) => [
             e.id,

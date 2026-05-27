@@ -5,7 +5,7 @@ import { Lock, Shield, AlertCircle, CheckCircle2, Save, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
 export const dynamic = "force-dynamic";
-import { mockAudit } from "@/lib/mock-audit";
+import { mockAuditService } from "@/lib/mock-audit";
 import { SettingsSectionSkeleton } from "@/components/ui/Skeleton";
 
 interface SecurityData {
@@ -61,7 +61,7 @@ export default function SecurityPage() {
       setSaved(draft);
       setStatus("success");
       setEditing(false);
-      mockAudit.logEvent("settings_change", { section: "security", changes: draft });
+      mockAuditService.logEvent("settings_change", { section: "security", changes: draft });
       setTimeout(() => setStatus("idle"), 3000);
     } catch {
       setStatus("error");
@@ -91,7 +91,7 @@ export default function SecurityPage() {
       setStatus("success");
       setShowPasswordModal(false);
       setNewPassword("");
-      mockAudit.logEvent("password_change", { timestamp: new Date().toISOString() });
+      mockAuditService.logEvent("password_change", { timestamp: new Date().toISOString() });
       setTimeout(() => setStatus("idle"), 3000);
     } catch {
       setStatus("error");

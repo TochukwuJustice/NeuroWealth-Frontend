@@ -5,7 +5,7 @@ import { Globe, Clock, DollarSign, Save, X, AlertCircle, CheckCircle2, Sun, Moon
 import { Button } from "@/components/ui/Button";
 
 export const dynamic = "force-dynamic";
-import { mockAudit } from "@/lib/mock-audit";
+import { mockAuditService } from "@/lib/mock-audit";
 import { SettingsSectionSkeleton } from "@/components/ui/Skeleton";
 import { useTheme, ThemeMode } from "@/contexts/ThemeProvider";
 
@@ -91,7 +91,7 @@ export default function PreferencesPage() {
       setSaved(draft);
       setStatus("success");
       setEditing(false);
-      mockAudit.logEvent("settings_change", { section: "preferences", changes: draft });
+      mockAuditService.logEvent("settings_change", { section: "preferences", changes: draft });
       setTimeout(() => setStatus("idle"), 3000);
     } catch {
       setStatus("error");
