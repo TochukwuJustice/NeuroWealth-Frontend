@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { STORAGE_KEYS } from "@/lib/storage-keys";
+import { logger } from "@/lib/logger";
 
 export type ScenarioType = "success" | "empty" | "loading" | "partial-failure" | "timeout";
 type ModuleType = "portfolio" | "history" | "transactions";
@@ -53,7 +54,7 @@ export function SandboxProvider({ children }: SandboxProviderProps) {
         try {
           setScenarios(JSON.parse(saved));
         } catch (e) {
-          console.error("Failed to load sandbox scenarios:", e);
+          logger.error("Failed to load sandbox scenarios", e);
         }
       }
     }

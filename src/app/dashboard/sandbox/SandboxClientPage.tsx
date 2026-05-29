@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { STORAGE_KEYS } from "@/lib/storage-keys";
+import { logger } from "@/lib/logger";
 
 type ScenarioType = "success" | "empty" | "loading" | "partial-failure" | "timeout";
 type ModuleType = "portfolio" | "history" | "transactions";
@@ -45,7 +46,7 @@ export default function SandboxClientPage() {
       try {
         setScenarios(JSON.parse(saved));
       } catch (e) {
-        console.error("Failed to load sandbox scenarios:", e);
+        logger.error("Failed to load sandbox scenarios", e);
       }
     }
   }, [sandboxStorageKey]);
