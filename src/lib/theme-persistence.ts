@@ -1,3 +1,5 @@
+import { STORAGE_KEYS } from "@/lib/storage-keys";
+
 /**
  * Theme persistence (localStorage)
  *
@@ -11,4 +13,4 @@
  *
  * The inline script cannot import this module; keep THEME_STORAGE_KEY identical there (see layout comment).
  */
-export const THEME_STORAGE_KEY = "nw-theme";
+export const THEME_STORAGE_KEY = STORAGE_KEYS.THEME;

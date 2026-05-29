@@ -3,6 +3,7 @@
 export const dynamic = "force-dynamic";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { notFound } from "next/navigation";
 import {
   Activity,
   BarChart3,
@@ -23,6 +24,8 @@ import {
   TransactionFormSkeleton,
 } from "@/components/ui/Skeleton";
 import { Button, Card, InlineBanner } from "@/components/ui";
+
+const DEV_ASYNC_STATES_ENABLED = process.env.NODE_ENV !== "production";
 
 // ─── Section wrapper ──────────────────────────────────────────────────────────
 
@@ -65,7 +68,7 @@ function PortfolioStateDemo() {
       {state.status === "error" && (
         <ErrorBlock
           title="Failed to load portfolio"
-          description={state.error ?? "An unexpected error occurred."}
+          description={state.error?.message ?? "An unexpected error occurred."}
           onAction={() => load("auto")}
         />
       )}
@@ -121,7 +124,7 @@ function StrategyStateDemo() {
       {fetchState.state.status === "error" && (
         <ErrorBlock
           title="Could not load strategies"
-          description={fetchState.state.error ?? "Strategy list unavailable."}
+          description={fetchState.state.error?.message ?? "Strategy list unavailable."}
           onAction={() => loadStrategies("auto")}
         />
       )}
@@ -164,7 +167,7 @@ function StrategyStateDemo() {
       {selectState.state.status === "error" && (
         <ErrorBlock
           title="Strategy change failed"
-          description={selectState.state.error ?? "Could not apply strategy."}
+          description={selectState.state.error?.message ?? "Could not apply strategy."}
           onAction={() => selectStrategy("success")}
         />
       )}
@@ -219,7 +222,7 @@ function TransactionStateDemo() {
       {quoteState.state.status === "error" && (
         <ErrorBlock
           title="Quote request failed"
-          description={quoteState.state.error ?? "Could not fetch quote."}
+          description={quoteState.state.error?.message ?? "Could not fetch quote."}
           onAction={() => getQuote("success")}
         />
       )}
@@ -234,7 +237,7 @@ function TransactionStateDemo() {
       {submitState.state.status === "error" && (
         <ErrorBlock
           title="Submission failed"
-          description={submitState.state.error ?? "Transaction could not be submitted."}
+          description={submitState.state.error?.message ?? "Transaction could not be submitted."}
           onAction={() => submit("success")}
         />
       )}
@@ -367,6 +370,10 @@ function HistoryStateDemo() {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function AsyncStatesPage() {
+  if (!DEV_ASYNC_STATES_ENABLED) {
+    notFound();
+  }
+
   return (
     <div className="space-y-6 px-6 py-8">
       <div className="flex flex-col gap-2">

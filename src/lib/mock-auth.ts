@@ -4,6 +4,8 @@
  * Simulates authentication for development/demo purposes.
  * Uses SESSION_STORAGE_KEY from auth-constants so the key is
  * never hardcoded in more than one place.
+ *
+ * Implements the AuthAdapter interface to allow swapping with real backend.
  */
 
 import { SESSION_STORAGE_KEY } from "./auth-constants";
@@ -12,12 +14,10 @@ import {
   type MockAuthUserRecord,
 } from "./user";
 import type { User } from "@/types";
+import type { AuthAdapter, AuthSession } from "./auth-adapter";
+import { random } from "./seeded-rng";
 
-export interface AuthSession {
-  user: User;
-  token: string;
-  expiresAt: number;
-}
+export type { AuthSession } from "./auth-adapter";
 
 const MOCK_USERS: Record<string, { password: string; user: MockAuthUserRecord }> = {
   "demo@neurowealth.app": {
@@ -34,7 +34,7 @@ const MOCK_USERS: Record<string, { password: string; user: MockAuthUserRecord }>
 };
 
 function generateToken(): string {
-  return `mock_token_${Math.random().toString(36).slice(2)}`;
+  return `mock_token_${random().toString(36).slice(2)}`;
 }
 
 function isLegacyMockAuthUserRecord(value: unknown): value is MockAuthUserRecord {
@@ -82,7 +82,7 @@ function normalizeSession(value: unknown): AuthSession | null {
   };
 }
 
-export const mockAuth = {
+export const mockAuth: AuthAdapter = {
   /** Read the current session from localStorage (client-only). */
   getSession(): AuthSession | null {
     if (typeof window === "undefined") return null;
@@ -136,7 +136,7 @@ export const mockAuth = {
       throw new Error("An account with this email already exists");
     }
     const user: MockAuthUserRecord = {
-      id: `usr_${Math.random().toString(36).slice(2)}`,
+      id: `usr_${random().toString(36).slice(2)}`,
       email: email.toLowerCase(),
       name,
       createdAt: new Date().toISOString(),

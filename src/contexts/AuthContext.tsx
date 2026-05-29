@@ -7,11 +7,12 @@ import React, {
   useEffect,
   useCallback,
 } from "react";
-import { AuthSession, mockAuth } from "@/lib/mock-auth";
+import type { AuthSession } from "@/lib/auth-adapter";
+import { getAuthAdapter } from "@/lib/auth-provider-factory";
 
 import { useRouter } from "next/navigation";
 import {
-  POST_SIGN_IN_PATH,
+  SESSION_COOKIE_NAME,
   SESSION_STORAGE_KEY,
   SIGN_IN_PATH,
 } from "@/lib/auth-constants";
@@ -27,16 +28,37 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+function setSessionCookie(session: AuthSession) {
+  if (typeof window === "undefined") return;
+  const cookieValue = encodeURIComponent(
+    JSON.stringify({ token: session.token, expiresAt: session.expiresAt }),
+  );
+  const expires = new Date(session.expiresAt).toUTCString();
+  const secureFlag = window.location.protocol === "https:" ? "; Secure" : "";
+  document.cookie = `${SESSION_COOKIE_NAME}=${cookieValue}; path=/; expires=${expires}; SameSite=Lax${secureFlag}`;
+}
+
+function clearSessionCookie() {
+  if (typeof window === "undefined") return;
+  document.cookie = `${SESSION_COOKIE_NAME}=; path=/; expires=${new Date(0).toUTCString()}; SameSite=Lax`;
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true); // true until we've checked storage
   const router = useRouter();
+  const authAdapter = getAuthAdapter();
 
   /** Derive user state from the persisted session. */
   const syncFromStorage = useCallback(() => {
-    const session: AuthSession | null = mockAuth.getSession();
+    const session: AuthSession | null = authAdapter.getSession();
     setUser(session ? session.user : null);
-  }, []);
+    if (session) {
+      setSessionCookie(session);
+    } else {
+      clearSessionCookie();
+    }
+  }, [authAdapter]);
 
   useEffect(() => {
     // Hydrate on mount
@@ -61,9 +83,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signIn = async (email: string, password: string) => {
     setLoading(true);
     try {
-      const session = await mockAuth.signIn(email, password);
+      const session = await authAdapter.signIn(email, password);
       setUser(session.user);
-      router.push(POST_SIGN_IN_PATH);
+      setSessionCookie(session);
     } finally {
       setLoading(false);
     }
@@ -72,16 +94,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signUp = async (email: string, name: string, password: string) => {
     setLoading(true);
     try {
-      const session = await mockAuth.signUp(email, name, password);
+      const session = await authAdapter.signUp(email, name, password);
       setUser(session.user);
-      router.push(POST_SIGN_IN_PATH);
+      setSessionCookie(session);
     } finally {
       setLoading(false);
     }
   };
 
   const signOut = () => {
-    mockAuth.signOut();
+    authAdapter.signOut();
+    clearSessionCookie();
     setUser(null);
     router.push(SIGN_IN_PATH);
   };

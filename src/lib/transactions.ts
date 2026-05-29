@@ -9,6 +9,8 @@ export type TransactionPreviewState =
   | "failure";
 export type ValidationTone = "error" | "success" | "warning";
 
+import { random } from "./seeded-rng";
+
 // Error recovery types
 export type RecoveryAction = "retry" | "edit" | "support";
 export type ErrorMode =
@@ -196,7 +198,7 @@ const ERROR_RECOVERY_COPY: Record<ErrorMode, TransactionRecoveryUI> = {
   },
   server_error: {
     title: "Service experiencing issues",
-    description: "Our service is temporarily unavailable or experiencing issues. Your details are saved. Try again in a few moments, or contact support for assistance.",
+    description: "Service is temporarily unavailable or experiencing issues. Your details are saved. Try again in a few moments, or contact support for assistance.",
     primaryAction: {
       label: "Try again later",
       action: "retry",
@@ -279,7 +281,7 @@ function generateReference(kind: TransactionKind): string {
     .toISOString()
     .replace(/[-:TZ.]/g, "")
     .slice(0, 14);
-  const suffix = Math.random().toString(36).slice(2, 8).toUpperCase();
+  const suffix = random().toString(36).slice(2, 8).toUpperCase();
 
   return `NW-${prefix}-${stamp}-${suffix}`;
 }
@@ -648,9 +650,11 @@ export function getTransactionRecoveryUI(
   codeOrMode: string,
   reference?: string,
 ): TransactionRecoveryUI {
-  const mode: ErrorMode = codeOrMode.includes("_")
-    ? (mapErrorCodeToErrorMode(codeOrMode) as ErrorMode)
-    : (codeOrMode as ErrorMode);
+  const normalized = codeOrMode.toLowerCase() as ErrorMode;
+  const mode: ErrorMode =
+    normalized in ERROR_RECOVERY_COPY
+      ? normalized
+      : mapErrorCodeToErrorMode(codeOrMode);
 
   const copy = ERROR_RECOVERY_COPY[mode] || ERROR_RECOVERY_COPY.unknown_error;
 

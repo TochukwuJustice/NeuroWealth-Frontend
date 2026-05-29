@@ -14,6 +14,7 @@ interface OnboardingState {
 export default function OnboardingSettings() {
   const [onboardingState, setOnboardingState] = useState<OnboardingState | null>(null);
   const [isResetting, setIsResetting] = useState(false);
+  const { pushToast } = useToast();
 
   useEffect(() => {
     fetchOnboardingState();
@@ -51,7 +52,11 @@ export default function OnboardingSettings() {
       globalThis.location.href = '/onboarding';
     } catch (error) {
       console.error('Failed to reset onboarding:', error);
-      alert('Failed to reset onboarding. Please try again.');
+      pushToast({
+        title: 'Failed to reset onboarding',
+        description: 'Please try again.',
+        variant: 'error',
+      });
     } finally {
       setIsResetting(false);
     }

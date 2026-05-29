@@ -1,3 +1,11 @@
+/**
+ * TAILWIND TOKEN OWNERSHIP RULE
+ * ─────────────────────────────
+ * • globals.css @theme  → single source of truth for design tokens
+ *                          (colors: dark-*, brand-*, semantic variables via CSS custom properties)
+ * • tailwind.config.ts  → content globs, animations, keyframes, fontFamily, plugins only.
+ *                          Do NOT add duplicate color tokens here; add them to @theme instead.
+ */
 import type { Config } from 'tailwindcss';
 
 const config: Config = {
@@ -9,7 +17,7 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // App-level
+        // App-level (legacy — migrate new tokens to globals.css @theme)
         "app-bg": "#030712",
         // Widget surfaces (Issue 29 spec)
         "surface": "#111827",
@@ -61,14 +69,7 @@ const config: Config = {
       backgroundImage: {
         "skeleton-gradient":
           "linear-gradient(90deg, #1F2937 25%, #374151 50%, #1F2937 75%)",
-        dark: {
-          900: '#0f172a',
-          800: '#1e293b',
-          700: '#334155',
-        },
-        brand: {
-          400: '#38bdf8',
-        },
+        // dark-* and brand-* tokens live in globals.css @theme — not here
         slate: {
           50: '#f8fafc',
           100: '#f1f5f9',

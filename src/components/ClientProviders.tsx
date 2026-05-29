@@ -1,14 +1,14 @@
 "use client";
 import { ReactNode } from "react";
 import { Networks } from "@stellar/stellar-sdk";
-import { AuthProvider } from "@/contexts";
-import { WalletProvider } from "@/contexts";
+import { AuthProvider, WalletProvider } from "@/contexts";
 import { I18nProvider } from "@/contexts/I18nContext";
 import { SandboxProvider } from "@/contexts/SandboxContext";
 import { ThemeProvider } from "@/contexts/ThemeProvider";
 import { ToastProvider } from "@/components/notifications/ToastProvider";
 import { CookieConsentProvider } from "@/contexts/CookieConsentContext";
 import { CookieBanner, PrivacyModal } from "@/components/cookie";
+import { composeProviders } from "@/lib/composeProviders";
 
 function resolveStellarConfig() {
   const rawNetwork = (process.env.NEXT_PUBLIC_STELLAR_NETWORK || "testnet").toLowerCase();
@@ -25,28 +25,23 @@ function resolveStellarConfig() {
 }
 
 export function ClientProviders({ children }: { children: ReactNode }) {
-  const walletConfig = resolveStellarConfig();
+  const { network, horizonUrl } = resolveStellarConfig();
+
+  const Providers = composeProviders([
+    SandboxProvider,
+    ThemeProvider,
+    I18nProvider,
+    AuthProvider,
+    [WalletProvider, { network, horizonUrl }],
+    ToastProvider,
+    CookieConsentProvider,
+  ]);
 
   return (
-    <SandboxProvider>
-      <ThemeProvider>
-        <I18nProvider>
-          <AuthProvider>
-            <WalletProvider
-              network={walletConfig.network}
-              horizonUrl={walletConfig.horizonUrl}
-            >
-              <ToastProvider>
-                <CookieConsentProvider>
-                  {children}
-                  <CookieBanner />
-                  <PrivacyModal />
-                </CookieConsentProvider>
-              </ToastProvider>
-            </WalletProvider>
-          </AuthProvider>
-        </I18nProvider>
-      </ThemeProvider>
-    </SandboxProvider>
+    <Providers>
+      {children}
+      <CookieBanner />
+      <PrivacyModal />
+    </Providers>
   );
 }

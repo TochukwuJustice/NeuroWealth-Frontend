@@ -63,7 +63,7 @@ export function Drawer({
       {/* Panel — 360px desktop, full mobile */}
       <div
         ref={containerRef}
-        className={`absolute top-0 bottom-0 ${positionClass} z-10 w-full sm:w-[360px] bg-white dark:bg-zinc-900 shadow-2xl flex flex-col transform transition-transform duration-300 ease-in-out ${slideClass}`}
+        className={`absolute top-0 bottom-0 ${positionClass} z-10 w-full sm:w-[360px] bg-white dark:bg-zinc-900 shadow-2xl flex flex-col transform transition-transform duration-300 ease-in-out motion-reduce:transform-none motion-reduce:transition-none motion-reduce:duration-0 ${slideClass}`}
       >
         {/* Header — 16px padding */}
         <div className="flex items-center justify-between px-4 py-4 border-b border-zinc-2ark:border-zinc-700">
@@ -74,7 +74,7 @@ export function Drawer({
             <button
               onClick={onClose}
               aria-label="Close drawer"
-              className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+              className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors motion-reduce:transition-none"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />

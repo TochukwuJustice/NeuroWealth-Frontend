@@ -1,3 +1,8 @@
+/**
+ * TOKEN OWNERSHIP: This file is the single source of truth for design tokens.
+ * Add new color/spacing/shadow tokens here via @theme.
+ * tailwind.config.ts handles only: content globs, animations, plugins.
+ */
 @import "tailwindcss";
 
 @theme {

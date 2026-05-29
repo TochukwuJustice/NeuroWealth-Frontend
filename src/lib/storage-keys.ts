@@ -1,39 +1,50 @@
 /**
  * Centralized storage key registry
  * All localStorage keys must be defined here to ensure consistency and prevent duplication.
- * Naming convention: "nw_" prefix for NeuroWealth keys, followed by feature name in snake_case
+ * Keys mirror existing app behavior and may use either `nw_` or legacy hyphenated names.
  */
 
 export const STORAGE_KEYS = {
-    // Cookie consent (Issue #131)
-    COOKIE_CONSENT: "nw_cookie_consent",
+  // Cookie consent
+  COOKIE_CONSENT: "nw_cookie_consent",
 
-    // Theme preferences
-    THEME: "nw_theme",
+  // Theme mode
+  THEME: "nw-theme",
 
-    // User preferences
-    PREFERENCES: "nw_preferences",
+  // Dashboard settings
+  PREFERENCES: "nw_preferences",
+  NOTIFICATIONS: "nw_notifications",
+  SECURITY: "nw_security",
+  NOTIFICATION_PREFERENCES: "nw-notification-preferences",
 
-    // Notification settings
-    NOTIFICATIONS: "nw_notifications",
+  // User profile
+  PROFILE: "nw_profile",
 
-    // Security settings
-    SECURITY: "nw_security",
+  // Strategy selection
+  STRATEGY_PREFERENCE: "nw_strategy_preference",
 
-    // Profile data
-    PROFILE: "nw_profile",
+  // Sandbox state
+  SANDBOX_SCENARIOS: "sandbox-scenarios",
 
-    // Onboarding state
-    ONBOARDING_STATE: "nw_onboarding_state",
+  // Onboarding flow
+  ONBOARDING_STATE: "onboarding-state",
+  ONBOARDING_USER_STRATEGY: "user-strategy",
+  ONBOARDING_FIRST_DEPOSIT: "first-deposit",
 
-    // Sandbox mode data
-    SANDBOX_SCENARIOS: "nw_sandbox_scenarios",
+  // Stellar wallet connection (WalletProvider)
+  WALLET_CONNECTED: "nw_wallet_connected",
+  WALLET_PUBLIC_KEY: "nw_wallet_public_key",
+  WALLET_NETWORK: "nw_wallet_network",
+  WALLET_PROVIDER: "nw_wallet_provider",
+  WALLET_DISPLAY_NAME: "nw_wallet_display_name",
+} as const;
 
-    // Wallet connection state (Stellar)
-    WALLET_CONNECTED: "nw_wallet_connected",
-    WALLET_PUBLIC_KEY: "nw_wallet_public_key",
-    WALLET_NETWORK: "nw_wallet_network",
-    WALLET_PROVIDER: "nw_wallet_provider",
+/** Legacy keys used before centralization; migrated on read. */
+export const LEGACY_WALLET_STORAGE_KEYS = {
+  CONNECTED: "stellar_wallet_connected",
+  PROVIDER: "stellar_wallet_id",
+  PUBLIC_KEY: "stellar_wallet_address",
+  DISPLAY_NAME: "stellar_wallet_name",
 } as const;
 
 /**
@@ -41,5 +52,5 @@ export const STORAGE_KEYS = {
  * Usage: getStorageKey('COOKIE_CONSENT')
  */
 export function getStorageKey(key: keyof typeof STORAGE_KEYS): string {
-    return STORAGE_KEYS[key];
+  return STORAGE_KEYS[key];
 }

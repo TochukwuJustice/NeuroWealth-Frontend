@@ -1,70 +1,76 @@
-// Mock data for chart examples
-export interface ChartDataPoint {
+import { randomInt } from "./seeded-rng";
+import type { ChartTone } from "./portfolio";
+
+// Chart input types modelled on real domain concepts rather than a loose
+// `{ name; value; [key: string]: any }` shape. Each chart consumes the
+// specific datum type it actually renders.
+
+/** Base datum for single-series charts: a label and a numeric value. */
+export interface ChartDatum {
   name: string;
   value: number;
-  [key: string]: any;
 }
 
+/** Portfolio value at a point in time, plus the yield earned that period. */
+export interface PortfolioValuePoint extends ChartDatum {
+  /** Yield earned during the period, in the portfolio's base currency. */
+  yield: number;
+}
+
+/** A slice of the asset-allocation donut, themed by tone. */
+export interface AssetAllocationSlice extends ChartDatum {
+  tone?: ChartTone;
+}
+
+/** Portfolio value vs. a benchmark for a given period (multi-series line). */
+export interface BenchmarkComparisonPoint {
+  name: string;
+  portfolio: number;
+  benchmark: number;
+}
+
+const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
 // Line/Area chart data: Portfolio value over time
-export const portfolioValueData: ChartDataPoint[] = [
-  { name: "Jan", value: 10000, yield: 120 },
-  { name: "Feb", value: 10500, yield: 150 },
-  { name: "Mar", value: 10200, yield: 80 },
-  { name: "Apr", value: 10800, yield: 200 },
-  { name: "May", value: 11500, yield: 300 },
-  { name: "Jun", value: 12000, yield: 250 },
-  { name: "Jul", value: 12500, yield: 400 },
-  { name: "Aug", value: 13000, yield: 350 },
-  { name: "Sep", value: 13500, yield: 300 },
-  { name: "Oct", value: 14200, yield: 450 },
-  { name: "Nov", value: 14800, yield: 380 },
-  { name: "Dec", value: 15200, yield: 320 },
-];
+export const portfolioValueData: PortfolioValuePoint[] = months.map((month, i) => {
+  const baseValue = 10000 + (i * 450);
+  const noise = randomInt(-300, 300);
+  return {
+    name: month,
+    value: baseValue + noise,
+    yield: randomInt(80, 450),
+  };
+});
 
 // Bar chart data: Monthly yield
-export const monthlyYieldData: ChartDataPoint[] = [
-  { name: "Jan", value: 120 },
-  { name: "Feb", value: 150 },
-  { name: "Mar", value: 80 },
-  { name: "Apr", value: 200 },
-  { name: "May", value: 300 },
-  { name: "Jun", value: 250 },
-  { name: "Jul", value: 400 },
-  { name: "Aug", value: 350 },
-  { name: "Sep", value: 300 },
-  { name: "Oct", value: 450 },
-  { name: "Nov", value: 380 },
-  { name: "Dec", value: 320 },
-];
+export const monthlyYieldData: ChartDatum[] = portfolioValueData.map((p) => ({
+  name: p.name,
+  value: p.yield,
+}));
 
 // Donut chart data: Asset allocation
-export const assetAllocationData: ChartDataPoint[] = [
-  { name: "USDC", value: 40, tone: "primary" },
-  { name: "USDT", value: 25, tone: "accent" },
-  { name: "XLM", value: 20, tone: "warning" },
-  { name: "Other", value: 15, tone: "neutral-strong" },
+export const assetAllocationData: AssetAllocationSlice[] = [
+  { name: "USDC", value: randomInt(35, 50), tone: "primary" },
+  { name: "USDT", value: randomInt(20, 30), tone: "accent" },
+  { name: "XLM", value: randomInt(15, 25), tone: "warning" },
+  { name: "Other", value: randomInt(5, 15), tone: "neutral-strong" },
 ];
 
 // Time series data for multiple lines
-export const multiLineData = [
-  { name: "Jan", portfolio: 10000, benchmark: 9800 },
-  { name: "Feb", portfolio: 10500, benchmark: 10100 },
-  { name: "Mar", portfolio: 10200, benchmark: 9900 },
-  { name: "Apr", portfolio: 10800, benchmark: 10300 },
-  { name: "May", portfolio: 11500, benchmark: 10800 },
-  { name: "Jun", portfolio: 12000, benchmark: 11200 },
-  { name: "Jul", portfolio: 12500, benchmark: 11800 },
-  { name: "Aug", portfolio: 13000, benchmark: 12300 },
-  { name: "Sep", portfolio: 13500, benchmark: 12800 },
-  { name: "Oct", portfolio: 14200, benchmark: 13500 },
-  { name: "Nov", portfolio: 14800, benchmark: 14100 },
-  { name: "Dec", portfolio: 15200, benchmark: 14600 },
-];
+export const multiLineData: BenchmarkComparisonPoint[] = months.map((month, i) => {
+  const portfolio = portfolioValueData[i].value;
+  const benchmarkBase = 9800 + (i * 400);
+  return {
+    name: month,
+    portfolio,
+    benchmark: benchmarkBase + randomInt(-200, 200),
+  };
+});
 
 // Categorical bar data
-export const categoricalBarData: ChartDataPoint[] = [
-  { name: "Deposits", value: 15000 },
-  { name: "Withdrawals", value: 3000 },
-  { name: "Yield", value: 2800 },
-  { name: "Fees", value: 200 },
+export const categoricalBarData: ChartDatum[] = [
+  { name: "Deposits", value: randomInt(12000, 18000) },
+  { name: "Withdrawals", value: randomInt(2000, 5000) },
+  { name: "Yield", value: randomInt(2000, 3500) },
+  { name: "Fees", value: randomInt(100, 300) },
 ];
